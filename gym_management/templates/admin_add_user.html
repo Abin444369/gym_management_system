@@ -1,6 +1,7 @@
-{% include 'partials/logout_button.html' %}
+{% extends 'base.html' %}
 {% block content %}
-<h2>Register</h2>
+<h2>Add New User</h2>
+
 <form method="post" id="register-form" onsubmit="return validateForm()">
     {% csrf_token %}
     {{ form.username.label_tag }} {{ form.username }}<br>
@@ -11,7 +12,7 @@
     <label for="id_role">Role:</label>
     <select name="role" id="id_role">
         <option value="trainer">Trainer</option>
-        <option value="member" selected>Member</option>
+        <option value="member">Member</option>
     </select><br><br>
 
     <div id="common-fields" style="display:none;">
@@ -30,9 +31,8 @@
         <label>Height (cm):</label><input type="number" step="0.1" name="height"><br>
     </div>
 
-    <button type="submit">Register</button>
+    <button type="submit">Create User</button>
 </form>
-
 
 <script>
     const roleSelect = document.getElementById('id_role');
@@ -49,32 +49,32 @@
 
     roleSelect.addEventListener('change', updateFields);
     document.addEventListener('DOMContentLoaded', updateFields);
+
     function validateForm() {
-        const role = roleSelect.value;
         const name = document.getElementById('name').value.trim();
         const age = document.getElementById('age').value.trim();
-        const address = document.getElementById('address').value.trim();
         const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
 
-        if (role === 'trainer' || role === 'member') {
-            if (!name || !age || !address || !phone) {
-                alert('Please fill in all required fields.');
-                return false;
-            }
-
-            const ageInt = parseInt(age);
-            if (isNaN(ageInt) || ageInt <= 0) {
-                alert('Age must be a valid positive number.');
-                return false;
-            }
-
-            if (!/^[0-9]{10}$/.test(phone)) {
-                alert('Phone number must be exactly 10 digits.');
-                return false;
-            }
+        if (!name || !age || !phone || !address) {
+            alert("All common fields must be filled!");
+            return false;
         }
-
+        if (!/^[0-9]+$/.test(age) || parseInt(age) <= 0) {
+            alert("Age must be a valid number.");
+            return false;
+        }
+        if (!/^[0-9]{10}$/.test(phone)) {
+            alert("Phone number must be exactly 10 digits.");
+            return false;
+        }
         return true;
     }
 </script>
+
+{% if messages %}
+    {% for message in messages %}
+        <p style="color:green">{{ message }}</p>
+    {% endfor %}
+{% endif %}
 {% endblock %}

@@ -1,8 +1,42 @@
-{% include 'partials/logout_button.html' %}
+{% extends 'base.html' %}
+{% block content %}
 
-<h2>Admin Dashboard</h2>
-<ul>
-    <li>View/Add/Delete Users</li>
-    <li>Assign Trainers</li>
-    <li>Generate Reports</li>
-</ul>
+<h2>Admin Dashboard - Manage Users</h2>
+
+<a href="{% url 'add_user' %}"><button>Add New User</button></a><br><br>
+
+{% if users %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Phone</th>
+        <th>Actions</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.age }}</td>
+        <td>{{ user.phone }}</td>
+        <td>
+            <a href="{% url 'delete_user' user.id %}" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p style="color:red;">No users found in the system.</p>
+{% endif %}
+
+{% if messages %}
+    {% for message in messages %}
+        <p style="color:green">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+{% endblock %}
