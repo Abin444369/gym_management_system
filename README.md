@@ -87,3 +87,21 @@ python manage.py runserver
 7.Visit:
 
 http://127.0.0.1:8000/
+
+🧪 Test Users (Example)
+Username	Password	Role
+admin1	admin123	Admin
+trainer1	train123	Trainer
+member1	mem123	Member
+
+📌 Notes
+No real payment integration — mock only
+
+Uses Django’s built-in auth system extended with role support
+
+Easy to extend: Add attendance, reports, analytics
+
+📄 License
+MIT — free to use and modify.
+---
+
