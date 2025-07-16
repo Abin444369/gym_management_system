@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 
 <h2>Admin Dashboard - Manage Users</h2>
@@ -14,6 +15,7 @@
         <th>Name</th>
         <th>Age</th>
         <th>Phone</th>
+        <th>Trainer</th>
         <th>Actions</th>
     </tr>
     {% for user in users %}
@@ -25,13 +27,31 @@
         <td>{{ user.age }}</td>
         <td>{{ user.phone }}</td>
         <td>
+            {% if user.role == 'member' %}
+            <form method="post" action="{% url 'assign_trainer' user.id %}">
+                {% csrf_token %}
+                <select name="trainer_id">
+                    <option value="">-- Select Trainer --</option>
+                    {% for trainer in trainers %}
+                    <option value="{{ trainer.id }}" {% if user.trainer and user.trainer.id == trainer.id %}selected{% endif %}>
+                        {{ trainer.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Assign</button>
+            </form>
+            {% else %}
+                N/A
+            {% endif %}
+        </td>
+        <td>
             <a href="{% url 'delete_user' user.id %}" onclick="return confirm('Are you sure?')">Delete</a>
         </td>
     </tr>
     {% endfor %}
 </table>
 {% else %}
-<p style="color:red;">No users found in the system.</p>
+<p>No users found in the system.</p>
 {% endif %}
 
 {% if messages %}
@@ -39,4 +59,5 @@
         <p style="color:green">{{ message }}</p>
     {% endfor %}
 {% endif %}
+
 {% endblock %}

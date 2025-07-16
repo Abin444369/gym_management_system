@@ -1,0 +1,30 @@
+<!-- templates/trainer_assigned_members.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Your Assigned Members</h2>
+
+{% if members %}
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Phone</th>
+            <th>Weight</th>
+            <th>Height</th>
+        </tr>
+        {% for member in members %}
+        <tr>
+            <td>{{ member.username }}</td>
+            <td>{{ member.name }}</td>
+            <td>{{ member.age }}</td>
+            <td>{{ member.phone }}</td>
+            <td>{{ member.weight }}</td>
+            <td>{{ member.height }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No members assigned to you.</p>
+{% endif %}
+{% endblock %}

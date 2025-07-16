@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from users.forms import CustomUserCreationForm
 from users.models import CustomUser
+from django.views.decorators.csrf import csrf_protect
 
 def home(request):
     return render(request, 'home.html')
@@ -54,8 +55,11 @@ def dashboard(request):
 def admin_dashboard(request):
     if request.user.role != 'admin':
         return redirect('dashboard')
-    users = CustomUser.objects.filter(role__in=['trainer', 'member'])
-    return render(request, 'admin_dashboard.html', {'users': users})
+    
+    users = CustomUser.objects.all()
+    trainers = CustomUser.objects.filter(role='trainer')  # ✅ Add this line
+    return render(request, 'admin_dashboard.html', {'users': users, 'trainers': trainers})
+
 
 @login_required
 def add_user(request):
@@ -79,4 +83,35 @@ def delete_user(request, user_id):
     if user.role != 'admin':
         user.delete()
         messages.success(request, "User deleted successfully.")
+    return redirect('admin_dashboard')
+
+@login_required
+def view_assigned_members(request):
+    if request.user.role != 'trainer':
+        return redirect('dashboard')
+    
+    members = CustomUser.objects.filter(role='member', trainer=request.user)
+    return render(request, 'trainer_assigned_members.html', {'members': members})
+
+@login_required
+@csrf_protect
+def assign_trainer(request, user_id):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+
+    member = get_object_or_404(CustomUser, id=user_id, role='member')
+
+    if request.method == 'POST':
+        trainer_id = request.POST.get('trainer_id')
+        if trainer_id:
+            trainer = CustomUser.objects.filter(id=trainer_id, role='trainer').first()
+            if trainer:
+                member.trainer = trainer
+                member.save()
+                messages.success(request, f"{member.username} assigned to {trainer.username}.")
+        else:
+            member.trainer = None
+            member.save()
+            messages.success(request, f"{member.username} unassigned from any trainer.")
+    
     return redirect('admin_dashboard')

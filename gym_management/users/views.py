@@ -36,7 +36,7 @@ def user_login(request):
             login(request, user)
             return redirect('dashboard')
         else:
-            messages.error(request, "Invalid credentials")
+            pass
     return render(request, 'login.html')
 
 # Logout
