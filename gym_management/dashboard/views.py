@@ -1,10 +1,14 @@
+import csv
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from users.forms import CustomUserCreationForm
 from users.models import CustomUser
 from django.views.decorators.csrf import csrf_protect
+from .models import Plan
+from .forms import PlanUploadForm
 
 def home(request):
     return render(request, 'home.html')
@@ -115,3 +119,76 @@ def assign_trainer(request, user_id):
             messages.success(request, f"{member.username} unassigned from any trainer.")
     
     return redirect('admin_dashboard')
+
+
+def is_admin(user):
+    return user.is_authenticated and user.role == 'admin'
+
+@login_required
+@user_passes_test(is_admin)
+def generate_mock_report(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="gym_mock_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Report: Gym Users'])
+
+    # Trainers Section
+    writer.writerow([])
+    writer.writerow(['--- Trainers ---'])
+    writer.writerow(['Username', 'Name', 'Experience', 'Phone', 'Email'])
+    trainers = CustomUser.objects.filter(role='trainer')
+    for t in trainers:
+        writer.writerow([t.username, t.name, t.experience, t.phone, t.email])
+
+    # Members Section
+    writer.writerow([])
+    writer.writerow(['--- Members ---'])
+    writer.writerow(['Username', 'Name', 'Age', 'Weight', 'Height', 'Trainer'])
+    members = CustomUser.objects.filter(role='member')
+    for m in members:
+        writer.writerow([
+            m.username, m.name, m.age, m.weight, m.height,
+            m.trainer.name if m.trainer else 'Not Assigned'
+        ])
+
+    return response
+
+
+def is_admin_or_trainer(user):
+    return user.is_authenticated and (user.role == 'admin' or user.role == 'trainer')
+
+
+@login_required
+def upload_plan(request):
+    if request.user.role != 'trainer':
+        return redirect('dashboard:trainer_dashboard')
+
+    assigned_members = CustomUser.objects.filter(trainer=request.user, role='member')
+
+    if request.method == 'POST':
+        form = PlanUploadForm(request.POST, request.FILES)
+        form.fields['member'].queryset = assigned_members  # limit dropdown
+
+        if form.is_valid():
+            selected_member = form.cleaned_data['member']
+            if selected_member.trainer != request.user:
+                messages.error(request, "You can only upload plans for your assigned members.")
+                return redirect('upload_plan')
+            plan = form.save(commit=False)
+            plan.trainer = request.user
+            plan.save()
+            messages.success(request, "Plan uploaded successfully.")
+            return redirect('upload_plan')
+    else:
+        form = PlanUploadForm()
+        form.fields['member'].queryset = assigned_members  # limit dropdown
+
+    return render(request, 'upload_plan.html', {'form': form})
+
+@login_required
+def view_my_plans(request):
+    if request.user.role != 'member':
+        return redirect('dashboard')
+    plans = Plan.objects.filter(member=request.user)
+    return render(request, 'view_my_plans.html', {'plans': plans})

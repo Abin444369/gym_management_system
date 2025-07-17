@@ -1,6 +1,7 @@
-{% extends 'base.html' %}
+{% include 'partials/logout_button.html' %} 
 {% load static %}
 {% block content %}
+<a href="{% url 'generate_mock_report' %}">Download Report (CSV)</a>
 
 <h2>Admin Dashboard - Manage Users</h2>
 
