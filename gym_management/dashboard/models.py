@@ -1,4 +1,3 @@
-# No models needed in dashboard app (uses CustomUser from users app)
 from django.db import models
 from users.models import CustomUser
 
@@ -15,3 +14,12 @@ class Plan(models.Model):
 
     def __str__(self):
         return f"{self.member.username} - {self.plan_type}"
+
+class Feedback(models.Model):
+    member = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role': 'member'})
+    message = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Feedback from {self.member.username}"
+    

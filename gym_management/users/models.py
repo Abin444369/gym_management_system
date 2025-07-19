@@ -1,5 +1,6 @@
 # users/models.py
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -29,3 +30,12 @@ class CustomUser(AbstractUser):
         limit_choices_to={'role': 'trainer'},
         related_name='assigned_members'
     )
+class Progress(models.Model):
+    member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={'role': 'member'})
+    date = models.DateField(auto_now_add=True)
+    weight = models.FloatField()
+    height = models.FloatField()
+    notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.member.username} - {self.date}"

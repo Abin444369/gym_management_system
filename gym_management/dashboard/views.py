@@ -9,6 +9,9 @@ from users.models import CustomUser
 from django.views.decorators.csrf import csrf_protect
 from .models import Plan
 from .forms import PlanUploadForm
+from .models import Feedback
+from users.models import Progress
+
 
 def home(request):
     return render(request, 'home.html')
@@ -187,8 +190,53 @@ def upload_plan(request):
     return render(request, 'upload_plan.html', {'form': form})
 
 @login_required
-def view_my_plans(request):
+def view_my_plans(request):         
     if request.user.role != 'member':
         return redirect('dashboard')
     plans = Plan.objects.filter(member=request.user)
     return render(request, 'view_my_plans.html', {'plans': plans})
+
+@login_required
+def submit_feedback(request):
+    if request.user.role != 'member':
+        return redirect('dashboard')  # Prevent non-members
+
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        if message:
+            Feedback.objects.create(member=request.user, message=message)
+            messages.success(request, "Feedback submitted successfully!")
+            return redirect('submit_feedback')
+        else:
+            messages.error(request, "Please enter your feedback.")
+    return render(request, 'member_feedback.html')
+
+
+@login_required
+def view_feedbacks(request):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+    feedbacks = Feedback.objects.select_related('member').all().order_by('-submitted_at')
+    return render(request, 'admin_view_feedbacks.html', {'feedbacks': feedbacks})
+
+@login_required
+def member_progress(request):
+    if request.user.role != 'member':
+        return redirect('home')
+
+    progresses = Progress.objects.filter(member=request.user).order_by('-date')
+
+    if request.method == 'POST':
+        try:
+            weight = float(request.POST.get('weight'))
+            height = float(request.POST.get('height'))
+            notes = request.POST.get('notes', '')
+
+            Progress.objects.create(member=request.user, weight=weight, height=height, notes=notes)
+            messages.success(request, "Progress entry added successfully.")
+            return redirect('member_progress')
+        except ValueError:
+            messages.error(request, "Please enter valid numeric values for weight and height.")
+
+    return render(request, 'member_progress.html', {'progresses': progresses})
+

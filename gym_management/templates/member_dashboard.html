@@ -4,8 +4,13 @@
 <ul>
     <li><a href="{% url 'view_my_plans' %}">View My Workout/Diet Plans</a>
 </li>
-    <li>Feedback</li>
-    <li>Track Progress</li>
+<li>
+        {% if user.role == 'member' %}
+    <a href="{% url 'submit_feedback' %}">Submit Feedback</a>
+{% endif %}</li>
+<li>
+        <a href="{% url 'member_progress' %}" class="btn btn-info mt-2">Track Progress</a>
+</li>
 </ul>
 <a href="/payment/">Make Payment</a>
 {% endblock %}
