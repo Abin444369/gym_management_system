@@ -14,5 +14,8 @@ urlpatterns = [
     path('feedback/', views.submit_feedback, name='submit_feedback'),
     path('view-feedbacks/', views.view_feedbacks, name='view_feedbacks'),
     path('progress/', views.member_progress, name='member_progress'),
+    path('progress/add/<int:member_id>/', views.add_progress, name='add_progress'),
+    path('progress/view/<int:member_id>/', views.view_progress, name='view_progress'),
+    path('progress/list/', views.progress_list, name='progress_list'),
 
 ]

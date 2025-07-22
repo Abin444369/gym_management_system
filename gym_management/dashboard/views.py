@@ -11,7 +11,7 @@ from .models import Plan
 from .forms import PlanUploadForm
 from .models import Feedback
 from users.models import Progress
-
+from .models import MemberProgress
 
 def home(request):
     return render(request, 'home.html')
@@ -224,15 +224,17 @@ def member_progress(request):
     if request.user.role != 'member':
         return redirect('home')
 
-    progresses = Progress.objects.filter(member=request.user).order_by('-date')
+    progresses = MemberProgress.objects.filter(member=request.user).order_by('-date')
 
     if request.method == 'POST':
         try:
-            weight = float(request.POST.get('weight'))
-            height = float(request.POST.get('height'))
-            notes = request.POST.get('notes', '')
-
-            Progress.objects.create(member=request.user, weight=weight, height=height, notes=notes)
+            progress = MemberProgress(
+                member=request.user,
+                weight=float(request.POST.get('weight')),
+                height=float(request.POST.get('height')),
+                notes=request.POST.get('notes', '')
+            )
+            progress.save()
             messages.success(request, "Progress entry added successfully.")
             return redirect('member_progress')
         except ValueError:
@@ -240,3 +242,56 @@ def member_progress(request):
 
     return render(request, 'member_progress.html', {'progresses': progresses})
 
+@login_required
+def add_progress(request, member_id):
+    if request.user.role != 'trainer':
+        messages.error(request, "Only trainers can add progress records.")
+        return redirect('dashboard')
+
+    member = get_object_or_404(CustomUser, id=member_id, role='member', trainer=request.user)
+
+    if request.method == 'POST':
+        try:
+            progress = MemberProgress(
+                member=member,
+                trainer=request.user,
+                weight=float(request.POST.get('weight')),
+                height=float(request.POST.get('height')),
+                performance=request.POST.get('performance'),
+                attendance=request.POST.get('attendance') == 'on',
+                notes=request.POST.get('notes', '')
+            )
+            progress.save()
+            messages.success(request, f"Progress recorded for {member.username}")
+            return redirect('view_progress', member_id=member_id)
+        except ValueError:
+            messages.error(request, "Please enter valid values.")
+    
+    return render(request, 'add_progress.html', {'member': member})
+@login_required
+def view_progress(request, member_id):
+    member = get_object_or_404(CustomUser, id=member_id)
+    
+    if request.user.role == 'trainer' and member.trainer != request.user:
+        messages.error(request, "You can only view progress for your assigned members.")
+        return redirect('dashboard')
+    
+    if request.user.role == 'member' and request.user.id != member_id:
+        messages.error(request, "You can only view your own progress.")
+        return redirect('dashboard')
+    
+    progress_records = MemberProgress.objects.filter(member=member).order_by('-date')
+    return render(request, 'view_progress.html', {
+        'member': member,
+        'progress_records': progress_records
+    })
+@login_required
+def progress_list(request):
+    if request.user.role == 'trainer':
+        members = CustomUser.objects.filter(trainer=request.user, role='member')
+    elif request.user.role == 'member':
+        members = [request.user]
+    else:
+        members = CustomUser.objects.filter(role='member')
+    
+    return render(request, 'progress_list.html', {'members': members})

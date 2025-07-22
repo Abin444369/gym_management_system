@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Member Progress List</h2>
+    
+    <div class="row mt-4">
+        {% for member in members %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ member.name|default:member.username }}</h5>
+                    <p class="card-text">
+                        {% if member.trainer %}
+                            <strong>Trainer:</strong> {{ member.trainer.name|default:member.trainer.username }}
+                        {% endif %}
+                    </p>
+                    <div class="btn-group">
+                        <a href="{% url 'view_progress' member.id %}" class="btn btn-primary">View Progress</a>
+                        {% if user.role == 'trainer' %}
+                            <a href="{% url 'add_progress' member.id %}" class="btn btn-success">Add Progress</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No members found.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

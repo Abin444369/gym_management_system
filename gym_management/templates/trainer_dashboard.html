@@ -1,15 +1,22 @@
-{% include 'partials/logout_button.html' %}
+{% extends 'base.html' %}
+
 {% block content %}
 <h2>Trainer Dashboard</h2>
 <ul>
     <li>
         <a href="{% url 'view_assigned_members' %}">
-    <button>View Assigned Members</button>
-</a></li>
+            <button>View Assigned Members</button>
+        </a>
+    </li>
     <li>
         <a href="{% url 'upload_plan' %}">
             <button>Upload Workout Plans/Diet Charts</button>
-</li>
-    <li>Upload Diet Charts</li>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'progress_list' %}">
+            <button>Member Progress Tracking</button>
+        </a>
+    </li>
 </ul>
 {% endblock %}

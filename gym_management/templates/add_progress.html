@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Progress for {{ member.username }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" step="0.1" name="weight" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" step="0.1" name="height" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Performance</label>
+            <select name="performance" class="form-control" required>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="average">Average</option>
+                <option value="needs_improvement">Needs Improvement</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="attendance" checked>
+                Present for Session
+            </label>
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Progress</button>
+    </form>
+</div>
+{% endblock %}

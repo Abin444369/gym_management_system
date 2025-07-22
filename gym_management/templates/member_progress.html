@@ -1,56 +1,84 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2>📈 Track Your Progress</h2>
+<div class="container mt-4">
+    <h2>My Progress Tracker</h2>
 
+    <!-- Progress Entry Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">Add New Progress Entry</h4>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="weight">Weight (kg)</label>
+                            <input type="number" step="0.1" name="weight" id="weight" 
+                                   class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" step="0.1" name="height" id="height" 
+                                   class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="notes">Notes</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Progress</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Messages -->
     {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
-    <form method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-            <label>Weight (kg):</label>
-            <input type="number" step="0.1" name="weight" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label>Height (cm):</label>
-            <input type="number" step="0.1" name="height" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label>Notes (optional):</label>
-            <textarea name="notes" class="form-control" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary mt-2">Add Entry</button>
-    </form>
-
-    <hr>
-    <h4 class="mt-4">Your Progress History</h4>
-    {% if progresses %}
-        <table class="table table-striped mt-3">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Weight (kg)</th>
-                    <th>Height (cm)</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in progresses %}
+    <!-- Progress History Table -->
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Progress History</h4>
+            <table class="table table-striped mt-3">
+                <thead>
                     <tr>
-                        <td>{{ p.date }}</td>
-                        <td>{{ p.weight }}</td>
-                        <td>{{ p.height }}</td>
-                        <td>{{ p.notes }}</td>
+                        <th>Date</th>
+                        <th>Weight (kg)</th>
+                        <th>Height (cm)</th>
+                        <th>BMI</th>
+                        <th>Performance</th>
+                        <th>Notes</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No progress entries yet.</p>
-    {% endif %}
+                </thead>
+                <tbody>
+                    {% for p in progresses %}
+                        <tr>
+                            <td>{{ p.date }}</td>
+                            <td>{{ p.weight }}</td>
+                            <td>{{ p.height }}</td>
+                            <td>{{ p.bmi|floatformat:2 }}</td>
+                            <td>{{ p.get_performance_display }}</td>
+                            <td>{{ p.notes }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No progress entries yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

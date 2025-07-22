@@ -23,3 +23,35 @@ class Feedback(models.Model):
     def __str__(self):
         return f"Feedback from {self.member.username}"
     
+
+
+class MemberProgress(models.Model):
+    PERFORMANCE_CHOICES = [
+        ('excellent', 'Excellent'),
+        ('good', 'Good'),
+        ('average', 'Average'),
+        ('needs_improvement', 'Needs Improvement')
+    ]
+    
+    member = models.ForeignKey(CustomUser, on_delete=models.CASCADE, 
+                             related_name='progress_records')
+    trainer = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                              limit_choices_to={'role': 'trainer'},
+                              related_name='recorded_progress',
+                              null=True, blank=True)  # Make trainer optional
+    date = models.DateField(auto_now_add=True)
+    weight = models.FloatField()
+    height = models.FloatField()
+    bmi = models.FloatField(blank=True, null=True)
+    performance = models.CharField(max_length=20, choices=PERFORMANCE_CHOICES, null=True, blank=True)
+    attendance = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.weight and self.height:
+            height_in_meters = self.height / 100
+            self.bmi = round(self.weight / (height_in_meters ** 2), 2)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-date']
