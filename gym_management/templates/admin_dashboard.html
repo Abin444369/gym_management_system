@@ -1,10 +1,10 @@
-{% include 'partials/logout_button.html' %} 
+{% include 'partials/logout_button.html' %}
 {% load static %}
 {% block content %}
 <a href="{% url 'generate_mock_report' %}">Download Report (CSV)</a>
 
-    <a href="{% url 'view_feedbacks' %}">View Feedback</a>
-
+<a href="{% url 'view_feedbacks' %}">View Feedback</a>
+<a href="{% url 'admin_view_payments' %}">View Payments</a> {# New link added here #}
 
 
 <h2>Admin Dashboard - Manage Users</h2>

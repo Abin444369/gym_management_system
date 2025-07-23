@@ -440,3 +440,12 @@ def razorpay_webhook(request):
         else:
             return HttpResponse(status=400, content="Invalid signature")
     return HttpResponse(status=405) # Method Not Allowed for GET requests
+
+@login_required
+def view_payments(request):
+    if request.user.role != 'admin':
+        messages.error(request, "You do not have permission to view payments.")
+        return redirect('dashboard') # Redirect to general dashboard or a restricted access page
+
+    payments = Payment.objects.all().order_by('-created_at') # Fetch all payments, ordered by newest first
+    return render(request, 'admin_view_payments.html', {'payments': payments})
