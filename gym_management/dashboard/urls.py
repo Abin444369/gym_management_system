@@ -1,4 +1,6 @@
 from django.urls import path
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required 
 from . import views
 
 urlpatterns = [
@@ -17,5 +19,9 @@ urlpatterns = [
     path('progress/add/<int:member_id>/', views.add_progress, name='add_progress'),
     path('progress/view/<int:member_id>/', views.view_progress, name='view_progress'),
     path('progress/list/', views.progress_list, name='progress_list'),
-
+    path('payment/', views.initiate_payment, name='initiate_payment'),
+    path('payment/success/', views.payment_success, name='payment_success'),
+    path('razorpay/webhook/', views.razorpay_webhook, name='razorpay_webhook'), # Webhook URL
 ]
+
+  

@@ -1,5 +1,4 @@
-
-
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -122,3 +121,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+RAZORPAY_KEY_ID = 'rzp_test_nxUQQMtqmmbXZb'  
+RAZORPAY_KEY_SECRET = 'ehCX4D3pgLtosu7cHqhcpTEd' 

@@ -1,4 +1,7 @@
 import csv
+from django.urls import reverse
+import razorpay
+import json
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -12,6 +15,13 @@ from .forms import PlanUploadForm
 from .models import Feedback
 from users.models import Progress
 from .models import MemberProgress
+from django.conf import settings
+from .models import Payment 
+from .forms import PaymentPlanForm
+
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+client.set_app_details(app_details={"title": "Gym_Management_System", "version": "1.0"})
+
 
 def home(request):
     return render(request, 'home.html')
@@ -295,3 +305,138 @@ def progress_list(request):
         members = CustomUser.objects.filter(role='member')
     
     return render(request, 'progress_list.html', {'members': members})
+
+@login_required
+def initiate_payment(request):
+    if request.method == 'POST':
+        form = PaymentPlanForm(request.POST)
+        if form.is_valid():
+            original_amount_in_rupees = form.get_amount() # Get amount in Rupees
+            amount_in_paisa = int(original_amount_in_rupees * 100) # Convert to paisa for Razorpay # Razorpay expects amount in paisa
+            currency = 'INR'
+            
+            # Create Razorpay Order
+            order_data = {
+                'amount': amount_in_paisa,
+                'currency': currency,
+                'receipt': f'receipt_for_{request.user.id}_{datetime.now().strftime("%Y%m%d%H%M%S")}',
+                'payment_capture': '1' # Auto capture payment
+            }
+            try:
+                razorpay_order = client.order.create(order_data)
+
+                # Save payment details in your database
+                payment = Payment.objects.create(
+                    user=request.user,
+                    razorpay_order_id=razorpay_order['id'],
+                    amount=form.get_amount(),
+                    currency=currency
+                )
+
+                context = {
+                    'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+                    'razorpay_order_id': razorpay_order['id'],
+                    'amount': amount_in_paisa,
+                    'display_amount': original_amount_in_rupees,
+                    'currency': currency,
+                    'name': request.user.name or request.user.username,
+                    'email': request.user.email,
+                    'phone': request.user.phone or '9999999999', # Provide a default if not available
+                    'callback_url': request.build_absolute_uri(reverse('payment_success')),
+                }
+                return render(request, 'payment.html', context)
+            except Exception as e:
+                messages.error(request, f"Error initiating payment: {e}")
+                return redirect('dashboard') # Or a dedicated error page
+    else:
+        form = PaymentPlanForm()
+    return render(request, 'payment.html', {'form': form, 'razorpay_key_id': settings.RAZORPAY_KEY_ID})
+
+
+@login_required
+def payment_success(request):
+    if request.method == 'POST':
+        # This view is called by Razorpay's checkout.js on successful payment
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+
+        # Verify the payment signature
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+
+        try:
+            client.utility.verify_payment_signature(params_dict)
+
+            # Update your payment record
+            payment = get_object_or_404(Payment, razorpay_order_id=razorpay_order_id)
+            payment.razorpay_payment_id = razorpay_payment_id
+            payment.paid = True
+            payment.save()
+
+            messages.success(request, "Payment successful! Thank you.")
+            return redirect('dashboard')
+
+        except Exception as e:
+            messages.error(request, f"Payment verification failed: {e}")
+            return redirect('dashboard')
+    else:
+        messages.error(request, "Invalid payment request.")
+        return redirect('dashboard')
+
+# --- Razorpay Webhook (Optional but Recommended for Production) ---
+# This is a separate endpoint that Razorpay will call directly when payment status changes.
+# It's more reliable than relying solely on client-side callbacks.
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from datetime import datetime
+import hmac
+import hashlib
+
+@csrf_exempt
+def razorpay_webhook(request):
+    if request.method == 'POST':
+        payload = request.body.decode('utf-8')
+        # Get the Razorpay signature from the request header
+        razorpay_signature = request.headers.get('x-razorpay-signature')
+
+        # Construct the webhook signature
+        expected_signature = hmac.new(
+            settings.RAZORPAY_KEY_SECRET.encode('utf-8'),
+            payload.encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest()
+
+        if expected_signature == razorpay_signature:
+            event = json.loads(payload)
+            event_type = event['event']
+
+            if event_type == 'payment.captured':
+                payment_id = event['payload']['payment']['entity']['id']
+                order_id = event['payload']['payment']['entity']['order_id']
+
+                try:
+                    payment_record = Payment.objects.get(razorpay_order_id=order_id)
+                    payment_record.razorpay_payment_id = payment_id
+                    payment_record.paid = True
+                    payment_record.save()
+                    # Log or perform further actions for successful payment
+                    print(f"Webhook: Payment {payment_id} for order {order_id} captured successfully.")
+                except Payment.DoesNotExist:
+                    print(f"Webhook: Payment record for order {order_id} not found in DB.")
+                except Exception as e:
+                    print(f"Webhook: Error updating payment record: {e}")
+            elif event_type == 'order.paid':
+                order_id = event['payload']['order']['entity']['id']
+                # Optionally handle order.paid event, similar to payment.captured
+                print(f"Webhook: Order {order_id} marked as paid.")
+            # Handle other events like payment.failed, refund.processed etc.
+            # You might want to log these events for auditing.
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=400, content="Invalid signature")
+    return HttpResponse(status=405) # Method Not Allowed for GET requests
