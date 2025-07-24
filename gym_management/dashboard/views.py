@@ -449,3 +449,24 @@ def view_payments(request):
 
     payments = Payment.objects.all().order_by('-created_at') # Fetch all payments, ordered by newest first
     return render(request, 'admin_view_payments.html', {'payments': payments})
+@login_required
+def manage_users(request):
+    # 1. This checks if the logged-in user is an admin.
+    if request.user.role != 'admin':
+        messages.error(request, "You do not have permission to manage users.")
+        return redirect('dashboard')
+
+    # 2. These lines get the data your template needs.
+    all_users = CustomUser.objects.all().order_by('username')
+    trainers = CustomUser.objects.filter(role='trainer').order_by('username')
+    
+    # 3. This dictionary packages the data for the template.
+    context = {
+        'users': all_users,
+        'trainers': trainers
+    }
+    
+    # 4. This is the final step that displays your page with all the data.
+    #    Make sure the path is correct if your template is in a subfolder, 
+    #    e.g., 'dashboard/manage_user.html'
+    return render(request, 'manage_users.html', context)

@@ -22,7 +22,8 @@ urlpatterns = [
     path('payment/', views.initiate_payment, name='initiate_payment'),
     path('payment/success/', views.payment_success, name='payment_success'),
     path('razorpay/webhook/', views.razorpay_webhook, name='razorpay_webhook'),
-    path('admin/payments/', views.view_payments, name='admin_view_payments'), 
+    path('admin/payments/', views.view_payments, name='admin_view_payments'),
+    path('manage_users/', views.manage_users, name='manage_users'),
 ]
 
   
