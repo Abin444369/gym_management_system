@@ -1,16 +1,17 @@
-{% include 'partials/logout_button.html' %}
+{% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <h2>Member Dashboard</h2>
 <ul>
-    <li><a href="{% url 'view_my_plans' %}">View My Workout/Diet Plans</a>
+    <li><a href="{% url 'view_my_plans' %}" class="btn btn-info mt-2">View My Workout/Diet Plans</a>
 </li>
 <li>
         {% if user.role == 'member' %}
-    <a href="{% url 'submit_feedback' %}">Submit Feedback</a>
+    <a href="{% url 'submit_feedback' %}" class="btn btn-info mt-2">Submit Feedback</a>
 {% endif %}</li>
 <li>
         <a href="{% url 'member_progress' %}" class="btn btn-info mt-2">Track Progress</a>
 </li>
 </ul>
-<a href="{% url 'initiate_payment' %}">Make Payment</a>
+<a href="{% url 'initiate_payment' %}" class="btn btn-info mt-2">Make Payment</a>
 {% endblock %}

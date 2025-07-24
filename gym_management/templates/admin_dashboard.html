@@ -1,68 +1,29 @@
-{% include 'partials/logout_button.html' %}
+{% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<a href="{% url 'generate_mock_report' %}">Download Report (CSV)</a>
+<h2>Admin Dashboard</h2>
 
-<a href="{% url 'view_feedbacks' %}">View Feedback</a>
-<a href="{% url 'admin_view_payments' %}">View Payments</a> {# New link added here #}
+<ul>
+    <li>
+        <a href="{% url 'manage_users' %}">
+            <button class="btn btn-info mt-2">Manage Users</button>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'view_feedbacks' %}">
+            <button class="btn btn-info mt-2">View Feedback</button>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'admin_view_payments' %}">
+            <button class="btn btn-info mt-2">View Payments</button>
+        </a>
+    </li>
+     <li>
+        <a href="{% url 'generate_mock_report' %}">
+            <button class="btn btn-info mt-2">Generate Mock Reports</button>
+        </a>
+    </li>
 
-
-<h2>Admin Dashboard - Manage Users</h2>
-
-<a href="{% url 'add_user' %}"><button>Add New User</button></a><br><br>
-
-{% if users %}
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Name</th>
-        <th>Age</th>
-        <th>Phone</th>
-        <th>Trainer</th>
-        <th>Actions</th>
-    </tr>
-    {% for user in users %}
-    <tr>
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.role }}</td>
-        <td>{{ user.name }}</td>
-        <td>{{ user.age }}</td>
-        <td>{{ user.phone }}</td>
-        <td>
-            {% if user.role == 'member' %}
-            <form method="post" action="{% url 'assign_trainer' user.id %}">
-                {% csrf_token %}
-                <select name="trainer_id">
-                    <option value="">-- Select Trainer --</option>
-                    {% for trainer in trainers %}
-                    <option value="{{ trainer.id }}" {% if user.trainer and user.trainer.id == trainer.id %}selected{% endif %}>
-                        {{ trainer.username }}
-                    </option>
-                    {% endfor %}
-                </select>
-                <button type="submit">Assign</button>
-            </form>
-            {% else %}
-                N/A
-            {% endif %}
-        </td>
-        <td>
-            <a href="{% url 'delete_user' user.id %}" onclick="return confirm('Are you sure?')">Delete</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>No users found in the system.</p>
-{% endif %}
-
-{% if messages %}
-    {% for message in messages %}
-        <p style="color:green">{{ message }}</p>
-    {% endfor %}
-{% endif %}
 
 {% endblock %}

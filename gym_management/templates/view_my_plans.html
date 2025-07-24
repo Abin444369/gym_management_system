@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h2>My Workout and Diet Plans</h2>
+<h2>My Workout and Diet Plans</h2><br>
 
 {% if plans %}
     <ul>
@@ -8,7 +9,7 @@
             <li>
                 <strong>{{ plan.get_plan_type_display }}</strong> - 
                 Uploaded on {{ plan.uploaded_at|date:"Y-m-d" }} - 
-                <a href="{{ plan.file.url }}" download>Download</a>
+                <a href="{{ plan.file.url }}" class="btn btn-info mt-2"download>Download</a>
             </li>
         {% endfor %}
     </ul>
@@ -16,5 +17,4 @@
     <p>No plans assigned to you yet.</p>
 {% endif %}
 
-<a href="{% url 'dashboard' %}">Back to Dashboard</a>
 {% endblock %}
