@@ -114,7 +114,7 @@ ol {
 }
 
 .section-title span {
-	color: #233EDE;
+	color: #17a2b8;
 	font-size: 12px;
 	font-weight: 900;
 	letter-spacing: 6px;
@@ -173,7 +173,7 @@ ol {
 	font-weight: 700;
 	padding: 20px 50px;
 	color: #fff;
-	background: #233EDE;
+	background: #17a2b8;
 	letter-spacing: 1.5px;
 	text-transform: uppercase;
 }
@@ -1775,7 +1775,7 @@ ol {
 }
 
 .accordin-elem .card-heading.active {
-	background: #233EDE;
+	background: #17a2b8;
 	color: #fff;
 }
 
@@ -1921,7 +1921,7 @@ ol {
 	display: inline-block;
 	height: 88px;
 	width: 88px;
-	background: #233EDE;
+	background: #17a2b8;
 	text-align: center;
 	line-height: 85px;
 	border-radius: 50%;
@@ -2147,7 +2147,7 @@ ol {
 		margin: 5px 5px 30px;
 		border-radius: 0;
 		float: right;
-		background-color: #233EDE;
+		background-color: #17a2b8;
 		position: relative;
 		top: -56px;
 	}

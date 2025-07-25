@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin Report</h2>
+
+<a href="{% url 'generate_mock_report' %}" class="btn btn-success">Download Report (CSV)</a>
+
+<h3>Trainers</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Username</th><th>Name</th><th>Experience</th><th>Phone</th><th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in trainers %}
+        <tr>
+            <td>{{ t.username }}</td>
+            <td>{{ t.name }}</td>
+            <td>{{ t.experience }}</td>
+            <td>{{ t.phone }}</td>
+            <td>{{ t.email }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No trainers found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Members</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Username</th><th>Name</th><th>Age</th><th>Weight</th><th>Height</th><th>Trainer</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in members %}
+        <tr>
+            <td>{{ m.username }}</td>
+            <td>{{ m.name }}</td>
+            <td>{{ m.age }}</td>
+            <td>{{ m.weight }}</td>
+            <td>{{ m.height }}</td>
+            <td>{% if m.trainer %}
+ {{ m.trainer.name }}
+{% else %}
+    Not Assigned
+{% endif %}
+</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No members found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if payments %}
+<h2>Payments</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Member</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Payment ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ payment.user.username }}</td>
+            <td>₹{{ payment.amount }}</td>
+            <td>{{ payment.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ payment.razorpay_payment_id }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

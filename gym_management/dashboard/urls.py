@@ -24,6 +24,8 @@ urlpatterns = [
     path('razorpay/webhook/', views.razorpay_webhook, name='razorpay_webhook'),
     path('admin/payments/', views.view_payments, name='admin_view_payments'),
     path('manage_users/', views.manage_users, name='manage_users'),
+    path('view-report/', views.view_report, name='view_report'),
+    path('admin/download-report/', views.generate_mock_report, name='generate_mock_report'),
 ]
 
   

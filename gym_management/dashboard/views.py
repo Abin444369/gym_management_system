@@ -26,8 +26,21 @@ client.set_app_details(app_details={"title": "Gym_Management_System", "version":
 def home(request):
     return render(request, 'home.html')
 
+@login_required
 def payment(request):
-    return render(request, 'payment.html')
+    # Check if the user has already made a successful payment
+    existing_payment = Payment.objects.filter(user=request.user, paid=True).order_by('-created_at').first()
+
+    if existing_payment:
+        return render(request, 'payment.html', {
+            'payment_done': True,
+            'amount': existing_payment.amount,
+            'payment_id': existing_payment.razorpay_payment_id,
+        })
+
+    form = PaymentPlanForm()
+    return render(request, 'payment.html', {'form': form, 'razorpay_key_id': settings.RAZORPAY_KEY_ID})
+
 
 def register(request):
     if request.method == 'POST':
@@ -59,14 +72,24 @@ def user_logout(request):
 @login_required
 def dashboard(request):
     role = request.user.role
+
     if role == 'admin':
         return redirect('admin_dashboard')
+    
     elif role == 'trainer':
         return render(request, 'trainer_dashboard.html')
+
     elif role == 'member':
-        return render(request, 'member_dashboard.html')
+        # ✅ Check if the user has paid
+        has_paid = Payment.objects.filter(user=request.user, paid=True).exists()
+
+        return render(request, 'member_dashboard.html', {
+            'has_paid': has_paid
+        })
+
     else:
         return redirect('home')
+
 
 @login_required
 def admin_dashboard(request):
@@ -139,6 +162,19 @@ def is_admin(user):
 
 @login_required
 @user_passes_test(is_admin)
+def view_report(request):
+    trainers = CustomUser.objects.filter(role='trainer')
+    members = CustomUser.objects.filter(role='member')
+    payments = Payment.objects.all() if Payment.objects.exists() else []
+
+    return render(request, 'view_report.html', {
+        'trainers': trainers,
+        'members': members,
+        'payments': payments,
+    })
+
+@login_required
+@user_passes_test(is_admin)
 def generate_mock_report(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="gym_mock_report.csv"'
@@ -146,7 +182,7 @@ def generate_mock_report(request):
     writer = csv.writer(response)
     writer.writerow(['Report: Gym Users'])
 
-    # Trainers Section
+    # Trainers
     writer.writerow([])
     writer.writerow(['--- Trainers ---'])
     writer.writerow(['Username', 'Name', 'Experience', 'Phone', 'Email'])
@@ -154,7 +190,7 @@ def generate_mock_report(request):
     for t in trainers:
         writer.writerow([t.username, t.name, t.experience, t.phone, t.email])
 
-    # Members Section
+    # Members
     writer.writerow([])
     writer.writerow(['--- Members ---'])
     writer.writerow(['Username', 'Name', 'Age', 'Weight', 'Height', 'Trainer'])
@@ -165,8 +201,20 @@ def generate_mock_report(request):
             m.trainer.name if m.trainer else 'Not Assigned'
         ])
 
-    return response
+    # Payments
+    writer.writerow([])
+    writer.writerow(['--- Payments ---'])
+    writer.writerow(['Username', 'Amount', 'Date', 'Payment ID'])
+    payments = Payment.objects.all()
+    for p in payments:
+        writer.writerow([
+            p.user.username,
+            str(p.amount),
+            p.created_at.strftime("%Y-%m-%d %H:%M"),
+            p.razorpay_payment_id or "N/A"
+        ])
 
+    return response
 
 def is_admin_or_trainer(user):
     return user.is_authenticated and (user.role == 'admin' or user.role == 'trainer')
