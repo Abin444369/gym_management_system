@@ -34,7 +34,7 @@ body {
 	height: 100%;
 	font-family: "Roboto", sans-serif;
 	-webkit-font-smoothing: antialiased;
-	font-smooth: antialiased;
+	font-smoothing: antialiased;
 	background: none;
 }
 
@@ -114,7 +114,7 @@ ol {
 }
 
 .section-title span {
-	color: #17a2b8;
+	color: #233EDE;
 	font-size: 12px;
 	font-weight: 900;
 	letter-spacing: 6px;
@@ -173,7 +173,7 @@ ol {
 	font-weight: 700;
 	padding: 20px 50px;
 	color: #fff;
-	background: #17a2b8;
+	background: #233EDE;
 	letter-spacing: 1.5px;
 	text-transform: uppercase;
 }
@@ -981,7 +981,7 @@ ol {
 }
 
 .footer-content .copyright i {
-	color: #ffffff;
+	color: #233EDE;
 }
 
 /*---------------------  Other Pages Style  -----------------------*/
@@ -1003,7 +1003,7 @@ ol {
 }
 
 .breadcrumb-area .breadcrumb-content .links {
-	background: #de2323;
+	background: #233EDE;
 	display: inline-block;
 	padding: 2px 17px;
 }
@@ -1775,7 +1775,7 @@ ol {
 }
 
 .accordin-elem .card-heading.active {
-	background: #17a2b8;
+	background: #233EDE;
 	color: #fff;
 }
 
@@ -1921,7 +1921,7 @@ ol {
 	display: inline-block;
 	height: 88px;
 	width: 88px;
-	background: #17a2b8;
+	background: #233EDE;
 	text-align: center;
 	line-height: 85px;
 	border-radius: 50%;
@@ -2147,7 +2147,7 @@ ol {
 		margin: 5px 5px 30px;
 		border-radius: 0;
 		float: right;
-		background-color: #17a2b8;
+		background-color: #233EDE;
 		position: relative;
 		top: -56px;
 	}
