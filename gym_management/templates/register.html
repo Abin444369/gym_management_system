@@ -1,55 +1,139 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<style>
+    body {
+        background-color: #f4f4f4;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+    }
+
+    form {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 30px 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    form div, form label {
+        margin-bottom: 10px;
+        font-weight: 500;
+        width: 100%;
+    }
+
+    input[type="text"], input[type="email"], input[type="number"], input[type="password"], select, textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-top: 5px;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .show-password {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    button[type="submit"] {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 100%;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    .error {
+        color: red;
+        font-size: 0.9em;
+    }
+
+</style>
+
 <h2>Register</h2>
 
 <form method="post" id="register-form" onsubmit="return validateForm()">
     {% csrf_token %}
 
     <div>
-        {{ form.username.label_tag }} {{ form.username }}
-        <div style="color:red;">{{ form.username.errors }}</div>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        <div class="error">{{ form.username.errors }}</div>
     </div>
 
     <div>
-        {{ form.email.label_tag }} {{ form.email }}
-        <div style="color:red;">{{ form.email.errors }}</div>
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        <div class="error">{{ form.email.errors }}</div>
     </div>
 
     <div>
         {{ form.password1.label_tag }}
         {{ form.password1 }}
-        <input type="checkbox" onclick="togglePassword('id_password1')"> Show Password
-        <div style="color:red;">{{ form.password1.errors }}</div>
+        <div class="show-password">
+            <input type="checkbox" onclick="togglePassword('id_password1')"> Show Password
+        </div>
+        <div class="error">{{ form.password1.errors }}</div>
     </div>
 
     <div>
         {{ form.password2.label_tag }}
         {{ form.password2 }}
-        <input type="checkbox" onclick="togglePassword('id_password2')"> Show Password
-        <div style="color:red;">{{ form.password2.errors }}</div>
+        <div class="show-password">
+            <input type="checkbox" onclick="togglePassword('id_password2')"> Show Password
+        </div>
+        <div class="error">{{ form.password2.errors }}</div>
     </div>
 
-    <label for="id_role">Role:</label>
-    <select name="role" id="id_role">
-        <option value="trainer" {% if request.POST.role == 'trainer' %}selected{% endif %}>Trainer</option>
-        <option value="member" {% if request.POST.role == 'member' or not request.POST.role %}selected{% endif %}>Member</option>
-    </select><br><br>
+    <div>
+        <label for="id_role">Role:</label>
+        <select name="role" id="id_role">
+            <option value="trainer" {% if request.POST.role == 'trainer' %}selected{% endif %}>Trainer</option>
+            <option value="member" {% if request.POST.role == 'member' or not request.POST.role %}selected{% endif %}>Member</option>
+        </select>
+    </div>
 
     <div id="common-fields" style="display:none;">
-        <label>Name:</label><input type="text" name="name" id="name" value="{{ request.POST.name }}"><br>
-        <label>Age:</label><input type="number" name="age" id="age" value="{{ request.POST.age }}"><br>
-        <label>Address:</label><textarea name="address" id="address">{{ request.POST.address }}</textarea><br>
-        <label>Phone:</label><input type="text" name="phone" id="phone" value="{{ request.POST.phone }}"><br>
+        <label>Name:</label>
+        <input type="text" name="name" id="name" value="{{ request.POST.name }}">
+        <label>Age:</label>
+        <input type="number" name="age" id="age" value="{{ request.POST.age }}">
+        <label>Address:</label>
+        <textarea name="address" id="address">{{ request.POST.address }}</textarea>
+        <label>Phone:</label>
+        <input type="text" name="phone" id="phone" value="{{ request.POST.phone }}">
     </div>
 
     <div id="trainer-fields" style="display:none;">
-        <label>Experience (years):</label><input type="number" name="experience" value="{{ request.POST.experience }}"><br>
+        <label>Experience (years):</label>
+        <input type="number" name="experience" value="{{ request.POST.experience }}">
     </div>
 
     <div id="member-fields" style="display:none;">
-        <label>Weight (kg):</label><input type="number" step="0.1" name="weight" value="{{ request.POST.weight }}"><br>
-        <label>Height (cm):</label><input type="number" step="0.1" name="height" value="{{ request.POST.height }}"><br>
+        <label>Weight (kg):</label>
+        <input type="number" step="0.1" name="weight" value="{{ request.POST.weight }}">
+        <label>Height (cm):</label>
+        <input type="number" step="0.1" name="height" value="{{ request.POST.height }}">
     </div>
 
     <button type="submit">Register</button>
